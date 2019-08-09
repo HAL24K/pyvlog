@@ -9,7 +9,7 @@ install_requires = [r.strip() for r in requirements_lines]
 
 setup(
     name="pyvlog",
-    version="0.0.1dev1",
+    version="0.0.1dev",
     author="Samuel Blake",
     author_email="samuelfblake@gmail.com",
     description="Python package for working with the V-Log traffic control data protocol",
