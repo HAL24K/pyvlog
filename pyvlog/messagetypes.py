@@ -6,7 +6,7 @@ MESSAGE_TYPE_DICT = {
     'interneFaseCyclus': [9,10],
     'overigeUitgangenGUS': [11,12],
     'externeSignaalgroep': [13,14],
-    'overigeUitgangenWUS': [15,16,],
+    'overigeUitgangenWUS': [15,16],
     'gewensteProgrammaStatus': [17,18],
     'werkelijkeProgrammaStatus': [19,20],
     'thermometer': [23,24],

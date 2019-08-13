@@ -18,6 +18,7 @@ setup(
     url="https://github.com/HAL24K/pyvlog",
     packages=find_packages(),
     install_requires=install_requires,
+    include_package_data=True,
     classifiers=[
         "Programming Language :: Python :: 3.7",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
