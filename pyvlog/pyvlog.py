@@ -161,6 +161,7 @@ class VLogParser(object):
         takes input self.status and **kwargs
     logged_types : list
         message types (should match keys of MESSAGE_TYPE_DICT) to be logged
+        if empty all types are logged
     log_unconverted : bool
         if True the object will log all messages is is unable to convert
     """
