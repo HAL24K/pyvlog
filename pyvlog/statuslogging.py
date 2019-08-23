@@ -56,13 +56,7 @@ def append_status_to_file(status, filename):
        path to file to write to
    """
 
-    # Convert datetime and timestamp data to isoformat and tenths of a second respectively
     status_out = {k:v for k,v in status.items()}
-    for k,v in status_out.items():
-        if type(v)==datetime:
-            status_out[k] = v.isoformat()
-        elif type(v)==timedelta:
-            status_out[k] = v/timedelta(seconds=0.1)
 
     with open(filename, 'a') as f:
         json.dump(status_out, f)

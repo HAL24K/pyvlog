@@ -1,6 +1,5 @@
-from datetime import datetime, timedelta
-
 from .messagetypes import *
+from datetime import datetime, timedelta
 
 
 # Useful functions
@@ -209,7 +208,7 @@ class VLogParser(object):
 
         assert int(message[:2], 16) % 2 == 1, "Not status message"
 
-        self.status['deltaTijd'] = timedelta(milliseconds=int(message[2:5], 16) * 100)
+        self.status['deltaTijd'] = int(message[2:5], 16)/10 # Log in seconds
         self.update_time()
         num_sensors = int(hex_string_to_bits(message[5:8])[2:], 2)
 
@@ -236,7 +235,7 @@ class VLogParser(object):
 
         assert int(message[:2], 16) % 2 == 0, "Not update message"
 
-        self.status['deltaTijd'] = timedelta(milliseconds=int(message[2:5], 16) * 100)
+        self.status['deltaTijd'] = int(message[2:5], 16)/10 # Log in seconds
         self.update_time()
         num_sensors = int(message[5], 16)
 
@@ -277,8 +276,8 @@ class VLogParser(object):
                         seconds=int(message[14:16]),
                         milliseconds=int(message[16]) * 100
                     )
-            )
-            self.status['deltaTijd'] = timedelta(0)
+            ).timestamp()
+            self.status['deltaTijd'] = 0
 
         elif message_type == 4:
             # V-Log information
