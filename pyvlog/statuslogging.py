@@ -1,8 +1,5 @@
 import sys
-import json
-import os
-from datetime import datetime, timedelta
-from copy import deepcopy
+import ujson
 
 
 # Logging functions
@@ -15,6 +12,7 @@ def do_nothing(status):
     status : dict
         vlog status to be logged
     """
+
     pass
 
 
@@ -27,6 +25,7 @@ def print_status(status):
     status : dict
         vlog status to be logged
     """
+
     sys.stdout.write('\r{}'.format(status))
 
 
@@ -41,12 +40,14 @@ def append_status_to_list(status, status_list):
     status_list : list
         list to be appended to
     """
-    status_list.append(deepcopy(status))
+
+    # ujson seems the fastest way of copying a dict
+    status_list.append(ujson.loads(ujson.dumps(status)))
 
 
-def append_status_to_file(status, filename):
+def append_status_to_json(status, filename):
     """
-   Append each logged status to a file as a json
+   Append each logged status to a json file
 
    Parameters
    ----------
@@ -56,8 +57,15 @@ def append_status_to_file(status, filename):
        path to file to write to
    """
 
-    status_out = {k:v for k,v in status.items()}
-
-    with open(filename, 'a') as f:
-        json.dump(status_out, f)
-        f.write(os.linesep)
+    with open(filename, 'ab+') as f:
+        f.seek(0, 2)
+        if f.tell() == 0:
+            # If empty then write full array
+            f.write(ujson.dumps([status]).encode())
+        else:
+            # Otherwise append status to existing array
+            f.seek(-1, 2)
+            f.truncate()
+            f.write(','.encode())
+            f.write(ujson.dumps(status).encode())
+            f.write(']'.encode())

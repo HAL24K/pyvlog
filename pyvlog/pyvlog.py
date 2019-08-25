@@ -160,12 +160,12 @@ class VLogParser(object):
         takes input self.status and **kwargs
     logged_types : list
         message types (should match keys of MESSAGE_TYPE_DICT) to be logged
-        if empty all types are logged
+        if empty list all types are logged
     log_unconverted : bool
-        if True the object will log all messages is is unable to convert
+        if True the object will log all messages is does not convert
     """
 
-    def __init__(self, log_function, logged_types=[], log_unconverted=False, **kwargs):
+    def __init__(self, log_function, logged_types=['detectie', 'externeSignaalgroep'], log_unconverted=False, **kwargs):
 
         if len(logged_types) == 0:
             logged_types = list(MESSAGE_TYPE_DICT.keys())
