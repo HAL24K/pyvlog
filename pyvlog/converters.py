@@ -152,7 +152,7 @@ def file_to_json(path_to_vlg, path_to_json, logged_types=['detectie', 'externeSi
 
 def file_to_dataframe(path_to_vlg, logged_types=['detectie', 'externeSignaalgroep']):
     """
-    Convert a file of v-log messages (each on a new line) to a list of statuses.
+    Convert a file of v-log messages (each on a new line) to a dataframe of statuses.
 
     Parameters
     ----------
