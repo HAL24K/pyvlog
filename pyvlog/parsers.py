@@ -1,3 +1,8 @@
+"""
+Classes for parsing V-Log messages and logging statuses,
+"""
+
+
 from .messagetypes import *
 from .utils import *
 from datetime import datetime, timedelta
@@ -6,19 +11,17 @@ import ujson
 
 class VLogParser(object):
     """
-    Base class for parsing v-log messages
-    Updates the v-log status but does not log completed statuses
+    Base class for parsing v-log messages.
+    Does not log statuses.
 
     Parameters
     ----------
     logged_types : list
-        message types (should match keys of MESSAGE_TYPE_DICT) to be logged
-        if empty list all types are logged
-    log_unconverted : bool
-        if True the object will log all messages is does not convert
+        Message types (should match keys of messagetypes.MESSAGE_TYPE_DICT) to be logged.
+        If empty list all types are logged.
     """
 
-    def __init__(self, logged_types=['detectie', 'externeSignaalgroep'], log_unconverted=False, **kwargs):
+    def __init__(self, logged_types=['detectie', 'externeSignaalgroep'], **kwargs):
 
         if len(logged_types) == 0:
             logged_types = list(MESSAGE_TYPE_DICT.keys())
@@ -37,25 +40,21 @@ class VLogParser(object):
         for key in logged_types:
             self.status[key] = {}
 
-        self.log_unconverted = log_unconverted
-        if self.log_unconverted:
-            self.unconverted = []
-
     def _parse_status(self, message, data_size):
         """
-        Parse the status part of a message
+        Parse the status part of a message.
 
         Parameters
         ----------
         message : str
-            v-log message
+            V-log message.
         data_size : float
-            size of one data item, in hex
+            Size of one data item, in hex.
 
         Returns
         ----------
         num_sensors : int
-            number of sensors in status
+            Number of sensors in status.
         """
 
         assert int(message[:2], 16) % 2 == 1, "Not status message"
@@ -70,19 +69,19 @@ class VLogParser(object):
 
     def _parse_update(self, message, data_size):
         """
-        Parse the update part of a message
+        Parse the update part of a message.
 
         Parameters
         ----------
         message : str
-            v-log message
+            V-log message.
         data_size : float
-            size of one data item, in hex
+            Size of one data item, in hex.
 
         Returns
         ----------
         num_sensors : int
-            number of sensors in status
+            Number of sensors in status.
         """
 
         assert int(message[:2], 16) % 2 == 0, "Not update message"
@@ -97,20 +96,19 @@ class VLogParser(object):
 
     def parse_message(self, message):
         """
-        Parse a v-log message and update the status
+        Parse a v-log message and update the status.
+        If the status is complete log_status is called.
 
         Parameters
         ----------
         message : str
-            v-log message
+            V-log message.
         """
 
         message_type = int(message[:2], 16)
 
         # Check if message is to be logged
         if message_type not in self.logged_types:
-            if self.log_unconverted:
-                self.unconverted.append(message)
             return
 
         if message_type == 1:
@@ -296,7 +294,7 @@ class VLogParser(object):
 
     def _update_time(self):
         """
-        Update the timestamp and if it has changed log the previous status
+        Update the timestamp and if it has changed log the previous status.
         """
         # Only log once we have seen a reference time
         if self.status['tijdReferentie'] and (self.status['timestamp']
@@ -314,12 +312,12 @@ class VLogParser(object):
 
     def log_status(self, status):
         """
-        Do absolutely nothing with each status
+        Placeholder function, does nothing with the status.
 
         Parameters
         ----------
         status : dict
-            v-log status to be logged
+            V-log status to be logged.
         """
 
         pass
@@ -327,34 +325,32 @@ class VLogParser(object):
 
 class VLogParserToList(VLogParser):
     """
-    Class for parsing v-log messages to a list of statuses
-    Appends each logged status to a list object
+    Class for parsing v-log messages to a list of statuses.
+    Appends each logged status to a list object.
 
     Parameters
     ----------
     status_list : list
-        list to be appended to
+        List to be appended to.
     logged_types : list
-        message types (should match keys of MESSAGE_TYPE_DICT) to be logged
-        if empty list all types are logged
-    log_unconverted : bool
-        if True the object will log all messages is does not convert
+        Message types (should match keys of messagetypes.MESSAGE_TYPE_DICT) to be logged.
+        If empty list all types are logged.
     """
 
-    def __init__(self, status_list, logged_types=['detectie', 'externeSignaalgroep'], log_unconverted=False):
+    def __init__(self, status_list, logged_types=['detectie', 'externeSignaalgroep']):
 
-        super().__init__(logged_types, log_unconverted, status_list=status_list)
+        super().__init__(logged_types, status_list=status_list)
 
     def log_status(self, status, status_list):
         """
-        Append each logged status to a list object
+        Append the status to a list.
 
         Parameters
         ----------
         status : dict
-            v-log status to be logged
+            V-log status to be logged.
         status_list : list
-            list to be appended to
+            List to be appended to.
         """
 
         # ujson seems the fastest way of copying a dict
@@ -363,34 +359,32 @@ class VLogParserToList(VLogParser):
 
 class VLogParserToJson(VLogParser):
     """
-    Class for parsing v-log messages to a json of statuses
-    Appends each logged status to a json file
+    Class for parsing v-log messages to a json of statuses.
+    Appends each logged status to a json file.
 
     Parameters
     ----------
     path_to_json : str
-       path to json file
+       Path to json file.
     logged_types : list
-        message types (should match keys of MESSAGE_TYPE_DICT) to be logged
-        if empty list all types are logged
-    log_unconverted : bool
-        if True the object will log all messages is does not convert
+        Message types (should match keys of messagetypes.MESSAGE_TYPE_DICT) to be logged.
+        If empty list all types are logged.
     """
 
-    def __init__(self, path_to_json, logged_types=['detectie', 'externeSignaalgroep'], log_unconverted=False):
+    def __init__(self, path_to_json, logged_types=['detectie', 'externeSignaalgroep']):
 
-        super().__init__(logged_types, log_unconverted, path_to_json=path_to_json)
+        super().__init__(logged_types, path_to_json=path_to_json)
 
     def log_status(self, status, path_to_json):
         """
-        Append each logged status to a json file
+        Append the status to a json file.
 
         Parameters
         ----------
         status : dict
-            v-log status to be logged
+            V-log status to be logged.
         path_to_json : str
-            path to json file
+            Path to json file.
         """
 
         with open(path_to_json, 'ab+') as f:

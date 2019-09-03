@@ -1,3 +1,8 @@
+"""
+Functions for converting V-Log data into statuses.
+"""
+
+
 from .parsers import *
 from .utils import flatten
 import pandas as pd
@@ -5,20 +10,20 @@ import pandas as pd
 
 def list_to_list(messages, logged_types=['detectie', 'externeSignaalgroep']):
     """
-    Convert a list of v-log messages to a list of statuses
+    Convert a list of v-log messages to a list of statuses.
 
     Parameters
     ----------
     messages : list
-        list of v-log messages
+        List of v-log messages.
     logged_types : list
-        message types (should match keys of MESSAGE_TYPE_DICT) to be logged
-        if empty list all types are logged
+        Message types (should match keys of messagetypes.MESSAGE_TYPE_DICT) to be logged.
+        If empty list all types are logged.
 
     Returns
     ----------
     status_list : list
-        list of statuses
+        List of statuses.
     """
 
     status_list = []
@@ -32,17 +37,17 @@ def list_to_list(messages, logged_types=['detectie', 'externeSignaalgroep']):
 
 def list_to_json(messages, path_to_json, logged_types=['detectie', 'externeSignaalgroep']):
     """
-    Convert a list of v-log messages to a json file of statuses
+    Convert a list of v-log messages to a json file of statuses.
 
     Parameters
     ----------
     messages : list
-        list of v-log messages
+        List of v-log messages.
     path_to_json : str
-       path to json file to write to
+       Path to json file to write to.
     logged_types : list
-        message types (should match keys of MESSAGE_TYPE_DICT) to be logged
-        if empty list all types are logged
+        Message types (should match keys of messagetypes.MESSAGE_TYPE_DICT) to be logged.
+        If empty list all types are logged.
     """
 
     vlogger = VLogParserToJson(path_to_json, logged_types=logged_types)
@@ -53,20 +58,20 @@ def list_to_json(messages, path_to_json, logged_types=['detectie', 'externeSigna
 
 def list_to_dataframe(messages, logged_types=['detectie', 'externeSignaalgroep']):
     """
-    Convert a list of v-log messages to a dataframe of statuses
+    Convert a list of v-log messages to a dataframe of statuses.
 
     Parameters
     ----------
     messages : list
-        list of vlog messages
+        List of vlog messages.
     logged_types : list
-        message types (should match keys of MESSAGE_TYPE_DICT) to be logged
-        if empty list all types are logged
+        Message types (should match keys of messagetypes.MESSAGE_TYPE_DICT) to be logged.
+        If empty list all types are logged.
 
     Returns
     ----------
     df : pd.DataFrame
-        dataframe of statuses
+        Dataframe of statuses.
     """
 
     status_list = []
@@ -89,20 +94,20 @@ def list_to_dataframe(messages, logged_types=['detectie', 'externeSignaalgroep']
 
 def file_to_list(path_to_vlg, logged_types=['detectie', 'externeSignaalgroep']):
     """
-    Convert a file of v-log messages (each on a new line) to a list of statuses
+    Convert a file of v-log messages (each on a new line) to a list of statuses.
 
     Parameters
     ----------
     path_to_vlg : str
-       path to file containing v-log messages
+       Path to file containing v-log messages.
     logged_types : list
-        message types (should match keys of MESSAGE_TYPE_DICT) to be logged
-        if empty list all types are logged
+        Message types (should match keys of messagetypes.MESSAGE_TYPE_DICT) to be logged.
+        If empty list all types are logged.
 
     Returns
     ----------
     status_list : list
-        list of statuses
+        List of statuses.
     """
 
     # Load the set of messages
@@ -121,17 +126,17 @@ def file_to_list(path_to_vlg, logged_types=['detectie', 'externeSignaalgroep']):
 
 def file_to_json(path_to_vlg, path_to_json, logged_types=['detectie', 'externeSignaalgroep']):
     """
-    Convert a file of v-log messages (each on a new line) to a json file of statuses
+    Convert a file of v-log messages (each on a new line) to a json file of statuses.
 
     Parameters
     ----------
     path_to_vlg : str
-       path to file containing vlog messages
+       Path to file containing vlog messages.
     path_to_json : str
-       path to json file to write to
+       Path to json file to write to.
     logged_types : list
-        message types (should match keys of MESSAGE_TYPE_DICT) to be logged
-        if empty list all types are logged
+        Message types (should match keys of messagetypes.MESSAGE_TYPE_DICT) to be logged.
+        If empty list all types are logged.
     """
 
     # Load the set of messages
@@ -147,20 +152,20 @@ def file_to_json(path_to_vlg, path_to_json, logged_types=['detectie', 'externeSi
 
 def file_to_dataframe(path_to_vlg, logged_types=['detectie', 'externeSignaalgroep']):
     """
-    Convert a file of v-log messages (each on a new line) to a list of statuses
+    Convert a file of v-log messages (each on a new line) to a list of statuses.
 
     Parameters
     ----------
     path_to_vlg : str
-       path to file containing vlog messages
+       Path to file containing vlog messages.
     logged_types : list
-        message types (should match keys of MESSAGE_TYPE_DICT) to be logged
-        if empty list all types are logged
+        Message types (should match keys of messagetypes.MESSAGE_TYPE_DICT) to be logged.
+        If empty list all types are logged.
 
     Returns
     ----------
     df : pd.DataFrame
-        dataframe of statuses
+        Dataframe of statuses.
     """
 
     # Load the set of messages

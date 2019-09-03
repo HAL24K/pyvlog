@@ -1,19 +1,24 @@
+"""
+Utility functions for converting hex messages and logging statuses.
+"""
+
+
 import collections
 
 
 def hex_string_to_bits(string):
     """
-    Convert a string of hex characters to bits
+    Convert a string of hex characters to bits.
 
     Parameters
     ----------
     string : str
-        string of hex characters
+        String of hex characters.
 
     Returns
     ----------
     bits : str
-        number of sensors in status
+        Number of sensors in status.
     """
 
     bits = "".join(["{0:04b}".format(int(c, 16)) for c in string])
@@ -23,17 +28,17 @@ def hex_string_to_bits(string):
 
 def parse_internal_data(string):
     """
-    Parse an element of internal phase data
+    Parse an element of internal phase data.
 
     Parameters
     ----------
     string : str
-        element of internal phase data
+        Element of internal phase data.
 
     Returns
     ----------
     out_concise : dict
-        dictionary of internal phase status
+        Dictionary of internal phase status.
     """
 
     assert len(string) == 3, "Message wrong size"
@@ -58,17 +63,17 @@ def parse_internal_data(string):
 
 def parse_detection_data(string):
     """
-    Parse an element of detection data
+    Parse an element of detection data.
 
     Parameters
     ----------
     string : str
-        element of detection data
+        Element of detection data.
 
     Returns
     ----------
     out_concise : dict
-        dictionary of internal phase status
+        Dictionary of internal phase status.
     """
     assert len(string) == 1, "Message wrong size"
 
@@ -88,17 +93,17 @@ def parse_detection_data(string):
 
 def parse_instruction_data(string):
     """
-    Parse an element of instruction variable status
+    Parse an element of instruction variable status.
 
     Parameters
     ----------
     string : str
-        element of instruction data
+        Element of instruction data.
 
     Returns
     ----------
     out_concise : dict
-        dictionary of internal phase status
+        Dictionary of internal phase status.
     """
 
     assert len(string) == 2, "Message wrong size"
@@ -121,17 +126,17 @@ def parse_instruction_data(string):
 
 def parse_ovhd_data(string):
     """
-    Parse an element of ov/hulpdienst data
+    Parse an element of ov/hulpdienst data.
 
     Parameters
     ----------
     string : str
-        element of internal phase data
+        Element of internal phase data.
 
     Returns
     ----------
     out_concise : dict
-        dictionary of internal phase status
+        Dictionary of internal phase status.
     """
 
     assert len(string) == 4, "Message wrong size"
@@ -148,21 +153,21 @@ def parse_ovhd_data(string):
 
 def flatten(d, parent_key='', sep='_'):
     """
-    Flatten a nested dict
+    Flatten a nested dict.
 
     Parameters
     ----------
     d : dict
-        dictionary to flatten
+        Dictionary to flatten.
     parent_key : str
-        parent key to prefix new key
+        Parent key to prefix new key.
     sep : str
-        separation character(s) for combined keys
+        Separation character(s) for combined keys.
 
     Returns
     ----------
     dict
-        flattened dict
+        Flattened dict.
     """
     items = []
     for k, v in d.items():
