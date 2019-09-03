@@ -1,163 +1,16 @@
 from .messagetypes import *
+from .utils import *
 from datetime import datetime, timedelta
+import ujson
 
 
-# Useful functions
-def hex_string_to_bits(string):
-    """
-    Convert a string of hex characters to bits
-
-    Parameters
-    ----------
-    string : str
-        string of hex characters
-
-    Returns
-    ----------
-    bits : str
-        number of sensors in status
-    """
-
-    bits = "".join(["{0:04b}".format(int(c, 16)) for c in string])
-
-    return bits
-
-
-def parse_internal_data(string):
-    """
-    Parse an element of internal phase data
-
-    Parameters
-    ----------
-    string : str
-        element of internal phase data
-
-    Returns
-    ----------
-    out_concise : dict
-        dictionary of internal phase status
-    """
-
-    assert len(string) == 3, "Message wrong size"
-
-    bits = hex_string_to_bits(string)
-
-    out_concise = {
-        'SR': bits[1],
-        'MR': bits[2],
-        'BR': bits[3],
-        'AR': bits[4],
-        'PR': bits[5],
-        'A': bits[6],
-        'CG': bits[7:]
-    }
-
-    for key, value in out_concise.items():
-        out_concise[key] = int(value, 2)
-
-    return out_concise
-
-
-def parse_detection_data(string):
-    """
-    Parse an element of detection data
-
-    Parameters
-    ----------
-    string : str
-        element of detection data
-
-    Returns
-    ----------
-    out_concise : dict
-        dictionary of internal phase status
-    """
-    assert len(string) == 1, "Message wrong size"
-
-    bits = hex_string_to_bits(string)
-
-    out_concise = {
-        'OG-BG-FL': bits[:2],
-        'storing': bits[2],
-        'bezet': bits[3]
-    }
-
-    for key, value in out_concise.items():
-        out_concise[key] = int(value, 2)
-
-    return out_concise
-
-
-def parse_instruction_data(string):
-    """
-    Parse an element of instruction variable status
-
-    Parameters
-    ----------
-    string : str
-        element of instruction data
-
-    Returns
-    ----------
-    out_concise : dict
-        dictionary of internal phase status
-    """
-
-    assert len(string) == 2, "Message wrong size"
-
-    bits = hex_string_to_bits(string)
-
-    out_concise = {
-        'TVG/MG': bits[3],
-        'YV/VVAG': bits[4],
-        'MK/H1H2': bits[5],
-        'Z/AFK': bits[6],
-        'FM/VMG': bits[7]
-    }
-
-    for key, value in out_concise.items():
-        out_concise[key] = int(value, 2)
-
-    return out_concise
-
-
-def parse_ovhd_data(string):
-    """
-    Parse an element of ov/hulpdienst data
-
-    Parameters
-    ----------
-    string : str
-        element of internal phase data
-
-    Returns
-    ----------
-    out_concise : dict
-        dictionary of internal phase status
-    """
-
-    assert len(string) == 4, "Message wrong size"
-
-    bits = hex_string_to_bits(string)
-
-    out_concise = {i: bits[-1 - i] for i in range(10)}
-
-    for key, value in out_concise.items():
-        out_concise[key] = int(value, 2)
-
-    return out_concise
-
-
-# VLog parsing object
 class VLogParser(object):
     """
-    Object for parsing v-log messages
+    Base class for parsing v-log messages
+    Updates the v-log status but does not log completed statuses
 
     Parameters
     ----------
-    log_function : function
-        function to be called each time the status is to be logged
-        takes input self.status and **kwargs
     logged_types : list
         message types (should match keys of MESSAGE_TYPE_DICT) to be logged
         if empty list all types are logged
@@ -165,15 +18,14 @@ class VLogParser(object):
         if True the object will log all messages is does not convert
     """
 
-    def __init__(self, log_function, logged_types=['detectie', 'externeSignaalgroep'], log_unconverted=False, **kwargs):
+    def __init__(self, logged_types=['detectie', 'externeSignaalgroep'], log_unconverted=False, **kwargs):
 
         if len(logged_types) == 0:
             logged_types = list(MESSAGE_TYPE_DICT.keys())
 
         assert set(logged_types).issubset(MESSAGE_TYPE_DICT.keys()), "logged types not understood"
 
-        self.log_status = log_function
-        self.log_kwargs = kwargs
+        self._log_kwargs = kwargs
 
         # Note which message types to log
         self.logged_types = [m_type for l_type in logged_types
@@ -196,7 +48,7 @@ class VLogParser(object):
         Parameters
         ----------
         message : str
-            vlog message
+            v-log message
         data_size : float
             size of one data item, in hex
 
@@ -209,7 +61,7 @@ class VLogParser(object):
         assert int(message[:2], 16) % 2 == 1, "Not status message"
 
         self.status['deltaTijd'] = int(message[2:5], 16)/10 # Log in seconds
-        self.update_time()
+        self._update_time()
         num_sensors = int(hex_string_to_bits(message[5:8])[2:], 2)
 
         assert len(message[8:]) >= data_size * num_sensors, "Num sensors exceeds message length"
@@ -223,7 +75,7 @@ class VLogParser(object):
         Parameters
         ----------
         message : str
-            vlog message
+            v-log message
         data_size : float
             size of one data item, in hex
 
@@ -236,7 +88,7 @@ class VLogParser(object):
         assert int(message[:2], 16) % 2 == 0, "Not update message"
 
         self.status['deltaTijd'] = int(message[2:5], 16)/10 # Log in seconds
-        self.update_time()
+        self._update_time()
         num_sensors = int(message[5], 16)
 
         assert len(message[6:]) >= data_size * num_sensors, "Num sensors exceeds message length"
@@ -250,7 +102,7 @@ class VLogParser(object):
         Parameters
         ----------
         message : str
-            vlog message
+            v-log message
         """
 
         message_type = int(message[:2], 16)
@@ -442,14 +294,9 @@ class VLogParser(object):
                 # Always add as no status for ov/hulpdienst update
                 self.status['OVHulpdienstInformatie'][index] = parse_ovhd_data(message[8 + i * 6:12 + i * 6])
 
-    def update_time(self):
+    def _update_time(self):
         """
         Update the timestamp and if it has changed log the previous status
-
-        Parameters
-        ----------
-        message : str
-            vlog message
         """
         # Only log once we have seen a reference time
         if self.status['tijdReferentie'] and (self.status['timestamp']
@@ -457,10 +304,104 @@ class VLogParser(object):
 
             # Log status and update time
             if self.status['timestamp']:
-                self.log_status(self.status, **self.log_kwargs)
+                self.log_status(self.status, **self._log_kwargs)
             self.status['timestamp'] = self.status['tijdReferentie'] + self.status['deltaTijd']
 
             # Wipe statuses which only exist at the timestamp of their production
             for key in WIPED_MESSAGES:
                 if key in self.status.keys():
                     self.status[key] = {}
+
+    def log_status(self, status):
+        """
+        Do absolutely nothing with each status
+
+        Parameters
+        ----------
+        status : dict
+            v-log status to be logged
+        """
+
+        pass
+
+
+class VLogParserToList(VLogParser):
+    """
+    Class for parsing v-log messages to a list of statuses
+    Appends each logged status to a list object
+
+    Parameters
+    ----------
+    status_list : list
+        list to be appended to
+    logged_types : list
+        message types (should match keys of MESSAGE_TYPE_DICT) to be logged
+        if empty list all types are logged
+    log_unconverted : bool
+        if True the object will log all messages is does not convert
+    """
+
+    def __init__(self, status_list, logged_types=['detectie', 'externeSignaalgroep'], log_unconverted=False):
+
+        super().__init__(logged_types, log_unconverted, status_list=status_list)
+
+    def log_status(self, status, status_list):
+        """
+        Append each logged status to a list object
+
+        Parameters
+        ----------
+        status : dict
+            v-log status to be logged
+        status_list : list
+            list to be appended to
+        """
+
+        # ujson seems the fastest way of copying a dict
+        status_list.append(ujson.loads(ujson.dumps(status)))
+
+
+class VLogParserToJson(VLogParser):
+    """
+    Class for parsing v-log messages to a json of statuses
+    Appends each logged status to a json file
+
+    Parameters
+    ----------
+    path_to_json : str
+       path to json file
+    logged_types : list
+        message types (should match keys of MESSAGE_TYPE_DICT) to be logged
+        if empty list all types are logged
+    log_unconverted : bool
+        if True the object will log all messages is does not convert
+    """
+
+    def __init__(self, path_to_json, logged_types=['detectie', 'externeSignaalgroep'], log_unconverted=False):
+
+        super().__init__(logged_types, log_unconverted, path_to_json=path_to_json)
+
+    def log_status(self, status, path_to_json):
+        """
+        Append each logged status to a json file
+
+        Parameters
+        ----------
+        status : dict
+            v-log status to be logged
+        path_to_json : str
+            path to json file
+        """
+
+        with open(path_to_json, 'ab+') as f:
+            f.seek(0, 2)
+            if f.tell() == 0:
+                # If empty then write full array
+                f.write(ujson.dumps([status]).encode())
+            else:
+                # Otherwise append status to existing array
+                f.seek(-1, 2)
+                f.truncate()
+                f.write(','.encode())
+                f.write(ujson.dumps(status).encode())
+                f.write(']'.encode())

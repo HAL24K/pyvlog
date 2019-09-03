@@ -1,5 +1,4 @@
-from pyvlog.pyvlog import VLogParser
-from pyvlog.statuslogging import do_nothing
+from pyvlog.parsers import VLogParser
 import ujson
 
 

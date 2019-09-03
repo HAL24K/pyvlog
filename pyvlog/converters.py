@@ -1,45 +1,16 @@
-from .pyvlog import VLogParser
-from .statuslogging import *
+from .parsers import *
+from .utils import flatten
 import pandas as pd
-import collections
-
-
-def flatten(d, parent_key='', sep='_'):
-    """
-    Flatten a nested dict
-
-    Parameters
-    ----------
-    d : dict
-        dictionary to flatten
-    parent_key : str
-        parent key to prefix new key
-    sep : str
-        separation character(s) for combined keys
-
-    Returns
-    ----------
-    dict
-        flattened dict
-    """
-    items = []
-    for k, v in d.items():
-        new_key = parent_key + sep + str(k) if parent_key else str(k)
-        if isinstance(v, collections.MutableMapping):
-            items.extend(flatten(v, new_key, sep=sep).items())
-        else:
-            items.append((new_key, v))
-    return dict(items)
 
 
 def list_to_list(messages, logged_types=['detectie', 'externeSignaalgroep']):
     """
-    Convert a list of vlog messages to a list of statuses
+    Convert a list of v-log messages to a list of statuses
 
     Parameters
     ----------
     messages : list
-        list of vlog messages
+        list of v-log messages
     logged_types : list
         message types (should match keys of MESSAGE_TYPE_DICT) to be logged
         if empty list all types are logged
@@ -51,7 +22,7 @@ def list_to_list(messages, logged_types=['detectie', 'externeSignaalgroep']):
     """
 
     status_list = []
-    vlogger = VLogParser(append_status_to_list, logged_types=logged_types, status_list=status_list)
+    vlogger = VLogParserToList(status_list, logged_types=logged_types)
 
     for m in messages:
         vlogger.parse_message(m.strip())  # Remove any whitespace from the messages
@@ -59,22 +30,22 @@ def list_to_list(messages, logged_types=['detectie', 'externeSignaalgroep']):
     return status_list
 
 
-def list_to_file(messages, out_filename, logged_types=['detectie', 'externeSignaalgroep']):
+def list_to_json(messages, path_to_json, logged_types=['detectie', 'externeSignaalgroep']):
     """
-    Convert a list of vlog messages to a json file of statuses
+    Convert a list of v-log messages to a json file of statuses
 
     Parameters
     ----------
     messages : list
-        list of vlog messages
-    out_filename : str
-       path to file to write to
+        list of v-log messages
+    path_to_json : str
+       path to json file to write to
     logged_types : list
         message types (should match keys of MESSAGE_TYPE_DICT) to be logged
         if empty list all types are logged
     """
 
-    vlogger = VLogParser(append_status_to_json, logged_types=logged_types, filename=out_filename)
+    vlogger = VLogParserToJson(path_to_json, logged_types=logged_types)
 
     for m in messages:
         vlogger.parse_message(m.strip())  # Remove any whitespace from the messages
@@ -82,7 +53,7 @@ def list_to_file(messages, out_filename, logged_types=['detectie', 'externeSigna
 
 def list_to_dataframe(messages, logged_types=['detectie', 'externeSignaalgroep']):
     """
-    Convert a list of vlog messages to a list of statuses
+    Convert a list of v-log messages to a dataframe of statuses
 
     Parameters
     ----------
@@ -99,7 +70,7 @@ def list_to_dataframe(messages, logged_types=['detectie', 'externeSignaalgroep']
     """
 
     status_list = []
-    vlogger = VLogParser(append_status_to_list, logged_types=logged_types, status_list=status_list)
+    vlogger = VLogParserToList(status_list, logged_types=logged_types)
 
     for m in messages:
         vlogger.parse_message(m.strip())  # Remove any whitespace from the messages
@@ -109,21 +80,21 @@ def list_to_dataframe(messages, logged_types=['detectie', 'externeSignaalgroep']
     df = pd.DataFrame(status_list)
 
     # Convert datetimes
-    df["timestamp"] = pd.to_datetime(df["timestamp"]*1000000000)
+    df["timestamp"] = pd.to_datetime(df["timestamp"] * 1000000000)
     df["tijdReferentie"] = pd.to_datetime(df["tijdReferentie"] * 1000000000)
-    df["deltaTijd"] = pd.to_timedelta(df["deltaTijd"]*1000000000)
+    df["deltaTijd"] = pd.to_timedelta(df["deltaTijd"] * 1000000000)
 
     return df
 
 
-def file_to_list(vlog_filename, logged_types=['detectie', 'externeSignaalgroep']):
+def file_to_list(path_to_vlg, logged_types=['detectie', 'externeSignaalgroep']):
     """
-    Convert a file of vlog messages (each on a new line) to a list of statuses
+    Convert a file of v-log messages (each on a new line) to a list of statuses
 
     Parameters
     ----------
-    vlog_filename : str
-       path to file containing vlog messages
+    path_to_vlg : str
+       path to file containing v-log messages
     logged_types : list
         message types (should match keys of MESSAGE_TYPE_DICT) to be logged
         if empty list all types are logged
@@ -135,12 +106,12 @@ def file_to_list(vlog_filename, logged_types=['detectie', 'externeSignaalgroep']
     """
 
     # Load the set of messages
-    with open(vlog_filename, "rb") as f:
+    with open(path_to_vlg, "rb") as f:
         messages = f.readlines()
     messages = [m.decode("utf-8").strip() for m in messages]
 
     status_list = []
-    vlogger = VLogParser(append_status_to_list, logged_types=logged_types, status_list=status_list)
+    vlogger = VLogParserToList(status_list, logged_types=logged_types)
 
     for m in messages:
         vlogger.parse_message(m.strip())  # Remove any whitespace from the messages
@@ -148,39 +119,39 @@ def file_to_list(vlog_filename, logged_types=['detectie', 'externeSignaalgroep']
     return status_list
 
 
-def file_to_file(vlog_filename, out_filename, logged_types=['detectie', 'externeSignaalgroep']):
+def file_to_json(path_to_vlg, path_to_json, logged_types=['detectie', 'externeSignaalgroep']):
     """
-    Convert a file of vlog messages (each on a new line) to a json file of statuses
+    Convert a file of v-log messages (each on a new line) to a json file of statuses
 
     Parameters
     ----------
-    vlog_filename : str
+    path_to_vlg : str
        path to file containing vlog messages
-    out_filename : str
-       path to file to write to
+    path_to_json : str
+       path to json file to write to
     logged_types : list
         message types (should match keys of MESSAGE_TYPE_DICT) to be logged
         if empty list all types are logged
     """
 
     # Load the set of messages
-    with open(vlog_filename, "rb") as f:
+    with open(path_to_vlg, "rb") as f:
         messages = f.readlines()
     messages = [m.decode("utf-8").strip() for m in messages]
 
-    vlogger = VLogParser(append_status_to_json, logged_types=logged_types, filename=out_filename)
+    vlogger = VLogParserToJson(path_to_json, logged_types=logged_types)
 
     for m in messages:
         vlogger.parse_message(m.strip())  # Remove any whitespace from the messages
 
 
-def file_to_dataframe(vlog_filename, logged_types=['detectie', 'externeSignaalgroep']):
+def file_to_dataframe(path_to_vlg, logged_types=['detectie', 'externeSignaalgroep']):
     """
-    Convert a file of vlog messages (each on a new line) to a list of statuses
+    Convert a file of v-log messages (each on a new line) to a list of statuses
 
     Parameters
     ----------
-    vlog_filename : str
+    path_to_vlg : str
        path to file containing vlog messages
     logged_types : list
         message types (should match keys of MESSAGE_TYPE_DICT) to be logged
@@ -193,12 +164,12 @@ def file_to_dataframe(vlog_filename, logged_types=['detectie', 'externeSignaalgr
     """
 
     # Load the set of messages
-    with open(vlog_filename, "rb") as f:
+    with open(path_to_vlg, "rb") as f:
         messages = f.readlines()
     messages = [m.decode("utf-8").strip() for m in messages]
 
     status_list = []
-    vlogger = VLogParser(append_status_to_list, logged_types=logged_types, status_list=status_list)
+    vlogger = VLogParserToList(status_list, logged_types=logged_types)
 
     for m in messages:
         vlogger.parse_message(m.strip())  # Remove any whitespace from the messages
