@@ -1,5 +1,5 @@
 """
-Classes for parsing V-Log messages and logging statuses,
+Classes for parsing V-Log messages and logging statuses.
 """
 
 
