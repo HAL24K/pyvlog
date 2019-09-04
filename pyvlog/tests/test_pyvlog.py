@@ -30,7 +30,7 @@ def test_parsing():
     messages = [m.decode("utf-8").strip() for m in messages]
 
     # Run them through the vlog parser
-    vlogger = VLogParser(do_nothing, logged_types=[])
+    vlogger = VLogParser(logged_types=[])
     for m in messages:
         vlogger.parse_message(m)
 
