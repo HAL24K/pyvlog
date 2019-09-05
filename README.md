@@ -93,12 +93,6 @@ from pyvlog.converters import file_to_json
 vlog_file = "test.vlg"
 out_file = "test.json"
 file_to_json(vlog_file, out_file)
-
-# Read in the out file to check contents
-import ujson
-with open(out_file, "rb") as f:
-    status_list = ujson.load(f)
-print(status_list[-1])
 ```
 
 For conversion to pandas dataframes the status dictionary is flattened (with "\_" joining the keys) and timing fields are converted to datetime / timedelta.
