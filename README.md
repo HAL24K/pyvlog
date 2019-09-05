@@ -120,7 +120,7 @@ The two additional classes defined in the `parsers` module, `VLogParserToList` a
 
 ### Traffic device coverage
 
-This package was developed for the processing of realtime v-log messages from a small number of smart intersections. As such not all types of v-log messages were available during its development. The message types currently parsed are given by the keys of `messagetypes.MESSAGE_TYPE_DICT` and are repeated below (with the v-log message prefix given in brackets).
+This package is developed for the processing of realtime v-log messages from a small number of smart intersections. As such not all types of v-log messages were available during its development. The message types currently parsed are given by the keys of `messagetypes.MESSAGE_TYPE_DICT` and are repeated below (with the v-log message prefix given in brackets).
 
 #### Message types parsed:
 - _tijdReferentie_ (1)
