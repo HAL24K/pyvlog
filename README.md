@@ -28,10 +28,10 @@ Naming and data conventions for the various traffic devices follow the specifica
 
 ## Installation
 
-pyvlog can be installed from this repository via pip:
+pyvlog can be installed via pip:
 
 ```
-pip install git+https://github.com/hal24k/pyvlog.git
+pip install pyvlog
 ```
 
 ## Documentation
