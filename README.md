@@ -83,9 +83,9 @@ print(status_list)
 
 Instructions on writing your own parser classes are provided below.
 
-### Convert v-log files to json
+### Convert v-log files to historic statuses
 
-A number of converter functions are provided for converting complete sets of v-log messages into their corresponding time-stamped statuses. These convert from a file or list of v-log messages to a file, list or pandas dataframe of statuses. Status data is written in JSON format, using UltraJSON.
+A number of converter functions are provided for converting complete sets of v-log messages into their corresponding time-stamped statuses. These convert from a file or list of v-log messages to a JSON file, list or pandas dataframe of historic statuses (e.g. `file_to_file` or `list_to_dataframe`). Status data is written in JSON format, using UltraJSON.
 
 ```python
 from pyvlog.converters import file_to_json
@@ -108,9 +108,7 @@ print(df.head())
 
 ### Write custom v-log parsers for your projects
 
-The `VLogParser` class is designed to be extendable to any number of different logging routines. To create a custom parsing class, you may simply inherit the base `VLogParser` class and define a new `.log_status()` method. This method must take the status as a (first) argument, followed by any number of further arguments. These further arguments must be set upon the initialisation of the class and passed as kwargs in the call to `super().__init__()`.
-
-The two additional classes defined in the `parsers` module, `VLogParserToList` and `VLogParserToJson`, illustrate how such a custom parsing class may be created.
+Custom parser classes can be created for any number of different logging routines, simply by inheriting the base `VLogParser` class and defining a new `.log_status()` method, plus any additional arguments. The two additional classes defined in the `parsers` module, `VLogParserToList` and `VLogParserToJson`, illustrate how such a custom parsing class may be created.
 
 ### Traffic device coverage
 
