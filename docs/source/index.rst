@@ -12,6 +12,8 @@ messaging protocol. It can be used to convert sequences of device messages into 
 combination of traffic devices at a smart intersection. UltraJSON_ provides fast writing of the status data to JSON
 format.
 
+See the README in the GitHub repo_ for usage examples.
+
 Indices and tables
 ==================
 
@@ -21,3 +23,4 @@ Indices and tables
 
 .. _V-Log: http://www.v-log.nl/
 .. _UltraJSON: https://pypi.org/project/ujson/
+.. _repo: https://github.com/HAL24K/pyvlog
